@@ -1,0 +1,14 @@
+# Integration with [noam](https://github.com/izuzak/noam)
+Let's generate a regular expression from our finite automaton!
+
+**How we name schemata for finite automata**
+* **Evan**: this repository
+* **Ivan**: noam repository
+
+**Contents of this directory**
+* `evanForSqlValuesClauses.json`: example of a finite automaton geenrated with this frontend (extracted from local storage). This automaton verifies a string to be a parenthesized SQL VALUES clause
+* `ivan.js`: wrapper for `noam.js` from noam
+
+**Objectives of `ivan.js`**
+1. Convert the finite automata with **Evan** schema to conform to **Ivan** schema. `noam.js` takes **Ivan** automaton as input and gives us a textbook regex as output.
+2. Decompress the textbook regex from `noam.js` so it can be tested on [regex101.com](https://regex101.com/).
