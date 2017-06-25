@@ -8,6 +8,7 @@ Let's generate a regular expression from our finite automaton!
 **Contents of this directory**
 * `evanForSqlValuesClauses.json`: example of a finite automaton geenrated with this frontend (extracted from local storage). This automaton verifies a string to be a parenthesized SQL VALUES clause
 * `ivan.js`: wrapper for `noam.js` from noam
+* `dependencies.sh`: gets `noam.js`
 
 **Objectives of `ivan.js`**
 1. Convert the finite automata with **Evan** schema to conform to **Ivan** schema. `noam.js` takes **Ivan** automaton as input and gives us a textbook regex as output.

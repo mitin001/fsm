@@ -1,29 +1,42 @@
 'use strict';
 
+const noam = require('./noam');
+const fsm = noam.fsm;
+const re = noam.re;
+const tree = re.tree;
+
+const stringify = num => num.toString ? num.toString() : num;
+
 const getIvan = evan => {
   let ivan;
   let nodes, links; // evan properties
-  let states = [], initial = 0, accepting = [], alphabet = [], transitions = []; // ivan properties
-  let aliases = { states: {}, characters: {} }; // conversion hashes
+  let states = [], initialState = '0', acceptingStates = [], alphabet = [], transitions = []; // ivan properties
+  let aliases = { states: {}, symbols: {} }; // conversion hashes
 
   const globalAlphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
   const parseNode = (node, index) => {
-    if (node.isAcceptState) accepting.push(index);
-    states.push(index);
+    index = stringify(index);
+    if (node.isAcceptState) acceptingStates.unshift(index);
+    states.unshift(index);
     aliases.states[index] = node.text;
   }
   const parseLink = (link, index) => {
-    let character = globalAlphabet[index];
-    alphabet.push(character);
-    aliases.characters[character] = link.text;
+    let fromState, toStates;
+    let symbol = globalAlphabet[stringify(index)];
+    alphabet.unshift(symbol);
+    aliases.symbols[symbol] = link.text;
     switch (link.type) {
       case 'Link':
-        transitions.push(`${link.nodeA}:${character}>${link.nodeB}`);
+        fromState = stringify(link.nodeA);
+        toStates = [stringify(link.nodeB)];
         break;
       case 'SelfLink':
-        transitions.push(`${link.node}:${character}>${link.node}`);
+        let node = stringify(link.node);
+        fromState = node;
+        toStates = [node];
         break;
     }
+    transitions.push({ fromState, toStates, symbol });
   };
 
   nodes = evan.nodes;
@@ -31,13 +44,7 @@ const getIvan = evan => {
   if (nodes && Array.isArray(nodes)) nodes.forEach(parseNode);
   if (links && Array.isArray(links)) links.forEach(parseLink);
 
-  ivan = [].concat(
-    ['#states'], states,
-    ['#initial'], [initial],
-    ['#accepting'], accepting,
-    ['#alphabet'], alphabet,
-    ['#transitions'], transitions
-  ).join('\n');
+  ivan = {states, alphabet, acceptingStates, initialState, transitions};
 
   return {ivan, aliases};
 };
@@ -55,11 +62,14 @@ const decompressRegex = (regex, characters) => {
   return regex.split('').map(convertCharacter).join('');
 };
 
-const getEvan = () => {}; // TODO: get from Evan frontend
-const getRegex = ivan => {}; // TODO: integrate with Ivan backend
+const getEvan = () => (); // TODO: get from Evan frontend
+const getRegex = ivan => {
+  let regex = fsm.toRegex(ivan);
+  let simplifiedRegex = tree.simplify(regex);
+  return tree.toString(simplifiedRegex);
+};
 
 let evan = getEvan();
 let ivanWithAliases = getIvan(evan);
 let textbookRegex = getRegex(ivanWithAliases.ivan);
-let regex = decompressRegex(textbookRegex, ivanWithAliases.aliases.characters);
-
+let regex = decompressRegex(textbookRegex, ivanWithAliases.aliases.symbols);
